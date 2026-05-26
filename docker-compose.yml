@@ -1,0 +1,22 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: employees_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    # tmpfs makes /var/lib/mysql live only in RAM.
+    # MySQL init scripts run whenever the data directory is empty,
+    # so data is fully reset on every `docker compose up -d`.
+    tmpfs:
+      - /var/lib/mysql
+    volumes:
+      - .:/sql-files:ro
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
